@@ -3,273 +3,470 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cronómetro Interactivo</title>
+    <title>Flash Box Pro - V4</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        :root { --primary: #6366f1; --success: #22c55e; }
+        body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; color: #1e293b; }
+        .nav-card { cursor: pointer; border: none; border-radius: 16px; transition: 0.3s; position: relative; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .nav-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .view-section { display: none; padding-top: 10px; animation: fadeIn 0.3s ease; }
+        .active-view { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .badge-count { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.3); backdrop-filter: blur(4px); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; }
+        .img-thumb { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; background: #e2e8f0; }
+        .upload-zone { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .btn-upload { border-radius: 12px; padding: 12px; font-weight: 600; transition: 0.2s; }
+        .loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            padding: 20px;
-        }
+        /* Modal mejorado */
+        .modal-custom { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content-custom { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
         
-        .container {
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-            color: white;
-        }
+        /* Modal de imagen */
+        .modal-image { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-image-content { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .modal-image-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .modal-image-close:hover { background: rgba(255,255,255,0.2); }
         
-        h1 {
-            margin-bottom: 20px;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        
-        .timer-display {
-            font-size: 4rem;
-            font-weight: bold;
-            margin: 20px 0;
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            letter-spacing: 3px;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
-        }
-        
-        .buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 25px 0;
-            flex-wrap: wrap;
-        }
-        
-        button {
-            padding: 12px 25px;
-            font-size: 1rem;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        
-        #startBtn {
-            background-color: #4CAF50;
-            color: white;
-        }
-        
-        #pauseBtn {
-            background-color: #FF9800;
-            color: white;
-        }
-        
-        #resetBtn {
-            background-color: #f44336;
-            color: white;
-        }
-        
-        #lapBtn {
-            background-color: #2196F3;
-            color: white;
-        }
-        
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-        
-        button:active {
-            transform: translateY(1px);
-        }
-        
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .laps {
-            margin-top: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-            border-radius: 10px;
-            background-color: rgba(0, 0, 0, 0.2);
-            padding: 10px;
-        }
-        
-        .laps h3 {
-            margin-bottom: 10px;
-        }
-        
-        .lap-item {
-            padding: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .lap-item:last-child {
-            border-bottom: none;
-        }
-        
-        .lap-number {
-            font-weight: bold;
-        }
-        
-        .lap-time {
-            font-family: monospace;
-        }
-        
-        @media (max-width: 480px) {
-            .timer-display {
-                font-size: 3rem;
-            }
-            
-            button {
-                padding: 10px 20px;
-                font-size: 0.9rem;
-            }
-        }
+        /* Iconos de archivos */
+        .file-icon { font-size: 2.5rem; text-align: center; margin-bottom: 10px; }
+        .file-pdf { color: #e53935; }
+        .file-audio { color: #8e24aa; }
+        .file-word { color: #2b579a; }
+        .file-excel { color: #217346; }
+        .file-powerpoint { color: #d24726; }
+        .file-cad { color: #ff6d00; }
+        .file-other { color: #757575; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Cronómetro</h1>
-        <div class="timer-display">00:00:00.00</div>
-        
-        <div class="buttons">
-            <button id="startBtn">Iniciar</button>
-            <button id="pauseBtn" disabled>Pausar</button>
-            <button id="resetBtn" disabled>Reiniciar</button>
-            <button id="lapBtn" disabled>Vuelta</button>
+
+<div id="loader" class="loader">
+    <div class="spinner-grow text-primary"></div>
+    <span id="loaderText" class="mt-3 fw-bold">Optimizando...</span>
+</div>
+
+<!-- Modal para editar notas -->
+<div id="noteModal" class="modal-custom">
+    <div class="modal-content-custom">
+        <h5 class="fw-bold mb-3">📝 Editar Nota</h5>
+        <input type="text" id="editNoteTitle" class="form-control mb-3 border-2" placeholder="Título de la nota...">
+        <textarea id="editNoteContent" class="form-control mb-3 border-2" placeholder="Contenido..." rows="8"></textarea>
+        <div class="d-flex gap-2 justify-content-end">
+            <button onclick="closeModal()" class="btn btn-light">Cancelar</button>
+            <button onclick="saveEditedNote()" class="btn btn-primary">Guardar Cambios</button>
         </div>
-        
-        <div class="laps">
-            <h3>Vueltas</h3>
-            <div id="lapsContainer"></div>
+    </div>
+</div>
+
+<!-- Modal para visualizar imágenes -->
+<div id="imageModal" class="modal-image">
+    <button class="modal-image-close" onclick="closeImageModal()">×</button>
+    <img id="modalImage" class="modal-image-content">
+</div>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold m-0" onclick="showView('home')" style="cursor:pointer">⚡ Flash Box</h2>
+        <button id="btnBack" class="btn btn-light border-0 rounded-pill d-none" onclick="showView('home')">← Inicio</button>
+    </div>
+
+    <div id="view-home" class="view-section active-view">
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3" onclick="loadAndShow('notas')"><div class="card nav-card bg-primary text-white p-4"><div id="count-notas" class="badge-count">0</div><div class="fs-2">📝</div><b>NOTAS</b></div></div>
+            <div class="col-6 col-md-3" onclick="loadAndShow('imagenes')"><div class="card nav-card bg-success text-white p-4"><div id="count-imagenes" class="badge-count">0</div><div class="fs-2">🖼️</div><b>FOTOS</b></div></div>
+            <div class="col-6 col-md-3" onclick="loadAndShow('pdf')"><div class="card nav-card bg-danger text-white p-4"><div id="count-pdf" class="badge-count">0</div><div class="fs-2">📕</div><b>PDFs</b></div></div>
+            <div class="col-6 col-md-3" onclick="loadAndShow('otros')"><div class="card nav-card bg-warning text-dark p-4"><div id="count-otros" class="badge-count">0</div><div class="fs-2">📦</div><b>OTROS</b></div></div>
+        </div>
+
+        <div class="upload-zone">
+            <h5 class="fw-bold mb-3">Subida Rápida</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 border rounded-4 bg-light">
+                        <small class="fw-bold text-primary">NUEVA NOTA</small>
+                        <input type="text" id="noteTitle" class="form-control my-2 border-0 shadow-sm" placeholder="Título de la nota...">
+                        <textarea id="noteContent" class="form-control mb-2 border-0 shadow-sm" placeholder="Contenido..." rows="2"></textarea>
+                        <button onclick="saveNote()" class="btn btn-primary btn-upload w-100">Guardar Nota</button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 border rounded-4 bg-light">
+                        <small class="fw-bold text-success">NUEVO ARCHIVO</small>
+                        <input type="text" id="customFileName" class="form-control my-2 border-0 shadow-sm" placeholder="Nombre opcional...">
+                        <input type="file" id="fileInput" class="form-control mb-2 border-0 shadow-sm">
+                        <button onclick="uploadFile()" class="btn btn-success btn-upload w-100 text-white">Subir Archivo</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        // Variables del cronómetro
-        let startTime = 0;
-        let elapsedTime = 0;
-        let timerInterval = null;
-        let isRunning = false;
-        let lapCount = 0;
+    <div id="view-notas" class="view-section"><h4>Mis Notas</h4><div id="list-notas" class="row g-3"></div></div>
+    <div id="view-imagenes" class="view-section"><h4>Galería de Imágenes</h4><div id="list-imagenes" class="row g-2"></div></div>
+    <div id="view-pdf" class="view-section"><h4>Documentos PDF</h4><div id="list-pdf" class="row g-2"></div></div>
+    <div id="view-otros" class="view-section"><h4>Otros Archivos</h4><div id="list-otros" class="row g-2"></div></div>
+</div>
 
-        // Elementos del DOM
-        const timerDisplay = document.querySelector('.timer-display');
-        const startBtn = document.getElementById('startBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const lapBtn = document.getElementById('lapBtn');
-        const lapsContainer = document.getElementById('lapsContainer');
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDCblC46q3GUlwr7yifm4dZ5FaW6Umzy_0",
+        authDomain: "dncaja-9d9a5.firebaseapp.com",
+        databaseURL: "https://dncaja-9d9a5-default-rtdb.firebaseio.com",
+        projectId: "dncaja-9d9a5",
+        storageBucket: "dncaja-9d9a5.firebasestorage.app",
+        messagingSenderId: "701237836936",
+        appId: "1:701237836936:web:39f0f7f7d455ce9ede733d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        // Formatear tiempo a formato HH:MM:SS.mm
-        function formatTime(time) {
-            const hours = Math.floor(time / 3600000);
-            const minutes = Math.floor((time % 3600000) / 60000);
-            const seconds = Math.floor((time % 60000) / 1000);
-            const milliseconds = Math.floor((time % 1000) / 10);
+    // Variables globales
+    let currentNoteId = null;
+
+    // Función para obtener icono según extensión
+    function getFileIcon(name) {
+        const ext = name.split('.').pop().toLowerCase();
+        
+        if (ext === 'pdf') return { icon: '📕', class: 'file-pdf' };
+        if (['mp3', 'wav', 'm4a', 'ogg', 'flac', 'aac'].includes(ext)) return { icon: '🎵', class: 'file-audio' };
+        if (['doc', 'docx', 'rtf'].includes(ext)) return { icon: '📘', class: 'file-word' };
+        if (['xls', 'xlsx', 'csv'].includes(ext)) return { icon: '📗', class: 'file-excel' };
+        if (['ppt', 'pptx'].includes(ext)) return { icon: '📙', class: 'file-powerpoint' };
+        if (['dwg', 'dxf', 'dwt', 'bak', 'dws', 'dwl', 'dwf', 'dwfx'].includes(ext)) return { icon: '📐', class: 'file-cad' };
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'tiff'].includes(ext)) return { icon: '🖼️', class: '' };
+        
+        return { icon: '📦', class: 'file-other' };
+    }
+
+    // --- CONTADORES INICIALES ---
+    function updateCounts() {
+        db.ref('notas').on('value', s => document.getElementById('count-notas').innerText = s.numChildren());
+        db.ref('metadata').on('value', s => {
+            let img = 0, pdf = 0, otr = 0;
+            s.forEach(child => {
+                const name = child.val().name.toLowerCase();
+                if(name.endsWith('.pdf')) pdf++;
+                else if(/\.(jpg|jpeg|png|gif|webp|bmp|svg|tiff)$/i.test(name)) img++;
+                else otr++;
+            });
+            document.getElementById('count-pdf').innerText = pdf;
+            document.getElementById('count-imagenes').innerText = img;
+            document.getElementById('count-otros').innerText = otr;
+        });
+    }
+    updateCounts();
+
+    // --- CARGA DINÁMICA ---
+    function loadAndShow(type) {
+        showLoader("Sincronizando...");
+        const listDiv = document.getElementById('list-' + type);
+        listDiv.innerHTML = "";
+        
+        const path = (type === 'notas') ? 'notas' : 'metadata';
+        db.ref(path).once('value', snap => {
+            const data = snap.val();
+            if(!data) listDiv.innerHTML = `<div class="col-12 text-center text-muted p-5">Vacío</div>`;
+            else {
+                Object.entries(data).reverse().forEach(([id, item]) => {
+                    const ext = item.name ? item.name.split('.').pop().toLowerCase() : '';
+                    if(type === 'pdf' && ext !== 'pdf') return;
+                    if(type === 'imagenes' && !['jpg','jpeg','png','gif','webp','bmp','svg','tiff'].includes(ext)) return;
+                    if(type === 'otros' && (ext === 'pdf' || ['jpg','jpeg','png','gif','webp','bmp','svg','tiff'].includes(ext))) return;
+                    
+                    renderItem(type, id, item, listDiv);
+                });
+            }
+            showView(type);
+            hideLoader();
+        });
+    }
+
+    function renderItem(type, id, item, container) {
+        const col = document.createElement('div');
+        
+        if(type === 'notas') {
+            col.className = 'col-12 col-md-4';
+            col.innerHTML = `
+                <div class="card p-3 border-0 shadow-sm h-100 rounded-4">
+                    <h6 class="fw-bold text-primary mb-1">${item.title || 'Sin Título'}</h6>
+                    <p class="small text-truncate mb-2">${item.content.substring(0,60)}...</p>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-light flex-grow-1" onclick="openNoteEditor('${id}')">Editar</button>
+                        <button class="btn btn-sm btn-light text-danger" onclick="deleteItem('notas','${id}')">Eliminar</button>
+                    </div>
+                </div>`;
+        } else if(type === 'imagenes') {
+            col.className = 'col-6 col-md-3';
+            const isLarge = (item.bytes || 0) > 1 * 1024 * 1024;
+            col.innerHTML = `
+                <div class="card p-1 border-0 shadow-sm rounded-3 overflow-hidden">
+                    <div id="thumb-${id}">
+                        ${!isLarge ? `<img src="https://placehold.co/200x200?text=Cargando..." class="img-thumb" id="img-${id}">` : 
+                        `<div class="img-thumb d-flex flex-column align-items-center justify-content-center bg-light" onclick="loadLargeImage('${id}')">
+                            <span class="fs-1">👁️</span><small class="fw-bold">CARGAR (${item.size})</small>
+                        </div>`}
+                    </div>
+                    <div class="p-1 d-flex justify-content-between align-items-center">
+                        <small class="text-truncate fw-bold" style="max-width:80%">${item.name}</small>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm p-0 text-primary" onclick="downloadFile('${id}', '${item.name}')" title="Descargar">⬇️</button>
+                            <button class="btn btn-sm p-0 text-danger" onclick="deleteItem('file','${id}')" title="Eliminar">✕</button>
+                        </div>
+                    </div>
+                </div>`;
+            if(!isLarge) fetchThumbnail(id);
+        } else if(type === 'pdf') {
+            col.className = 'col-6 col-md-4';
+            const fileIcon = getFileIcon(item.name);
+            col.innerHTML = `
+                <div class="card p-3 border-0 shadow-sm rounded-4">
+                    <div class="${fileIcon.class} file-icon">${fileIcon.icon}</div>
+                    <div class="text-center mb-3">
+                        <b class="d-block text-truncate">${item.name}</b>
+                        <small class="text-muted">${item.size} • ${formatDate(item.time)}</small>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button onclick="downloadFile('${id}', '${item.name}')" class="btn btn-sm btn-primary" title="Descargar">⬇️ Descargar</button>
+                        <button onclick="deleteItem('file','${id}')" class="btn btn-sm btn-danger" title="Eliminar">✕ Eliminar</button>
+                    </div>
+                </div>`;
+        } else if(type === 'otros') {
+            col.className = 'col-6 col-md-4';
+            const fileIcon = getFileIcon(item.name);
+            col.innerHTML = `
+                <div class="card p-3 border-0 shadow-sm rounded-4">
+                    <div class="${fileIcon.class} file-icon">${fileIcon.icon}</div>
+                    <div class="text-center mb-3">
+                        <b class="d-block text-truncate">${item.name}</b>
+                        <small class="text-muted">${item.size} • ${formatDate(item.time)}</small>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button onclick="downloadFile('${id}', '${item.name}')" class="btn btn-sm btn-primary" title="Descargar">⬇️ Descargar</button>
+                        <button onclick="deleteItem('file','${id}')" class="btn btn-sm btn-danger" title="Eliminar">✕ Eliminar</button>
+                    </div>
+                </div>`;
+        }
+        container.appendChild(col);
+    }
+
+    function formatDate(timestamp) {
+        if(!timestamp) return 'Sin fecha';
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    }
+
+    // --- MODAL DE IMAGEN ---
+    function openImageModal(imageUrl) {
+        document.getElementById('modalImage').src = imageUrl;
+        document.getElementById('imageModal').style.display = 'flex';
+    }
+
+    function closeImageModal() {
+        document.getElementById('imageModal').style.display = 'none';
+        document.getElementById('modalImage').src = '';
+    }
+
+    // Cerrar modal de imagen al hacer clic fuera
+    document.getElementById('imageModal').addEventListener('click', function(e) {
+        if(e.target === this) closeImageModal();
+    });
+
+    // Cerrar con Escape
+    document.addEventListener('keydown', function(e) {
+        if(e.key === 'Escape') {
+            closeModal();
+            closeImageModal();
+        }
+    });
+
+    // --- EDITOR DE NOTAS ---
+    function openNoteEditor(id) {
+        db.ref('notas/' + id).once('value').then(snap => {
+            const note = snap.val();
+            if(note) {
+                currentNoteId = id;
+                document.getElementById('editNoteTitle').value = note.title || '';
+                document.getElementById('editNoteContent').value = note.content || '';
+                document.getElementById('noteModal').style.display = 'flex';
+            }
+        });
+    }
+
+    function saveEditedNote() {
+        if(!currentNoteId) return;
+        
+        const newTitle = document.getElementById('editNoteTitle').value.trim() || 'Nota sin título';
+        const newContent = document.getElementById('editNoteContent').value.trim();
+        
+        if(!newContent) {
+            alert("El contenido no puede estar vacío");
+            return;
+        }
+        
+        showLoader("Guardando cambios...");
+        db.ref('notas/' + currentNoteId).update({
+            title: newTitle,
+            content: newContent,
+            updated: Date.now()
+        }).then(() => {
+            hideLoader();
+            closeModal();
+            loadAndShow('notas');
+        });
+    }
+
+    function closeModal() {
+        document.getElementById('noteModal').style.display = 'none';
+        currentNoteId = null;
+    }
+
+    // --- FUNCIONES DE ARCHIVOS ---
+    function fetchThumbnail(id) {
+        db.ref('file_storage/'+id+'/data').once('value').then(s => {
+            const imgEl = document.getElementById('img-'+id);
+            if(imgEl && s.val()) {
+                imgEl.src = s.val();
+                imgEl.onclick = () => openImageModal(s.val());
+            }
+        });
+    }
+
+    function loadLargeImage(id) {
+        showLoader("Cargando imagen grande...");
+        db.ref('file_storage/'+id+'/data').once('value').then(s => {
+            if(s.val()) {
+                document.getElementById('thumb-'+id).innerHTML = 
+                    `<img src="${s.val()}" class="img-thumb" onclick="openImageModal('${s.val()}')">`;
+                hideLoader();
+            }
+        });
+    }
+
+    function uploadFile() {
+        const file = document.getElementById('fileInput').files[0];
+        if(!file) return alert("Selecciona un archivo");
+        
+        let customName = document.getElementById('customFileName').value.trim();
+        const ext = file.name.split('.').pop();
+        const finalName = customName ? `${customName}.${ext}` : file.name;
+
+        showLoader("Subiendo " + finalName);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const key = db.ref('metadata').push().key;
+            const meta = { 
+                name: finalName, 
+                size: formatFileSize(file.size), 
+                bytes: file.size,
+                type: file.type,
+                time: Date.now()
+            };
+            const up = {};
+            up['/metadata/'+key] = meta;
+            up['/file_storage/'+key] = { data: e.target.result };
+            db.ref().update(up).then(() => {
+                hideLoader();
+                document.getElementById('fileInput').value = "";
+                document.getElementById('customFileName').value = "";
+                alert("Archivo subido ✓");
+                updateCounts();
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function formatFileSize(bytes) {
+        if(bytes < 1024) return bytes + ' B';
+        if(bytes < 1024 * 1024) return (bytes/1024).toFixed(1) + ' KB';
+        return (bytes/(1024*1024)).toFixed(1) + ' MB';
+    }
+
+    function downloadFile(id, name) {
+        showLoader("Preparando descarga...");
+        db.ref('file_storage/'+id+'/data').once('value').then(s => {
+            if(!s.val()) {
+                hideLoader();
+                alert("Error: Archivo no encontrado");
+                return;
+            }
             
-            return (
-                String(hours).padStart(2, '0') + ':' +
-                String(minutes).padStart(2, '0') + ':' +
-                String(seconds).padStart(2, '0') + '.' +
-                String(milliseconds).padStart(2, '0')
-            );
-        }
+            const a = document.createElement("a");
+            a.href = s.val();
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            hideLoader();
+        });
+    }
 
-        // Actualizar el display del cronómetro
-        function updateTimer() {
-            const currentTime = Date.now();
-            elapsedTime = currentTime - startTime;
-            timerDisplay.textContent = formatTime(elapsedTime);
+    function deleteItem(mode, id) {
+        if(!confirm("¿Estás seguro de que quieres eliminar esto? Esta acción no se puede deshacer.")) return;
+        
+        showLoader("Eliminando...");
+        if(mode === 'notas') {
+            db.ref('notas/' + id).remove().then(() => {
+                hideLoader();
+                loadAndShow('notas');
+                updateCounts();
+            });
+        } else {
+            Promise.all([
+                db.ref('metadata/' + id).remove(),
+                db.ref('file_storage/' + id).remove()
+            ]).then(() => {
+                hideLoader();
+                // Recargar la vista actual
+                const activeView = document.querySelector('.view-section.active-view').id.replace('view-', '');
+                if(activeView !== 'home') loadAndShow(activeView);
+                updateCounts();
+            });
         }
+    }
 
-        // Iniciar el cronómetro
-        function startTimer() {
-            if (!isRunning) {
-                startTime = Date.now() - elapsedTime;
-                timerInterval = setInterval(updateTimer, 10);
-                isRunning = true;
-                
-                // Actualizar estado de los botones
-                startBtn.disabled = true;
-                pauseBtn.disabled = false;
-                resetBtn.disabled = false;
-                lapBtn.disabled = false;
-            }
-        }
+    function saveNote() {
+        const t = document.getElementById('noteTitle').value.trim() || 'Nota sin título';
+        const c = document.getElementById('noteContent').value.trim();
+        if(!c) return alert("Escribe el contenido");
+        
+        showLoader("Guardando nota...");
+        db.ref('notas').push({
+            title: t, 
+            content: c, 
+            time: Date.now(),
+            updated: Date.now()
+        }).then(() => {
+            document.getElementById('noteTitle').value = "";
+            document.getElementById('noteContent').value = "";
+            hideLoader();
+            alert("Nota guardada ✓");
+            updateCounts();
+        });
+    }
 
-        // Pausar el cronómetro
-        function pauseTimer() {
-            if (isRunning) {
-                clearInterval(timerInterval);
-                isRunning = false;
-                
-                // Actualizar estado de los botones
-                startBtn.disabled = false;
-                pauseBtn.disabled = true;
-            }
-        }
+    // --- VISTAS ---
+    function showView(v) {
+        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active-view'));
+        document.getElementById('view-' + v).classList.add('active-view');
+        document.getElementById('btnBack').classList.toggle('d-none', v === 'home');
+    }
 
-        // Reiniciar el cronómetro
-        function resetTimer() {
-            clearInterval(timerInterval);
-            isRunning = false;
-            elapsedTime = 0;
-            lapCount = 0;
-            timerDisplay.textContent = '00:00:00.00';
-            lapsContainer.innerHTML = '';
-            
-            // Actualizar estado de los botones
-            startBtn.disabled = false;
-            pauseBtn.disabled = true;
-            resetBtn.disabled = true;
-            lapBtn.disabled = true;
-        }
-
-        // Registrar una vuelta
-        function recordLap() {
-            if (isRunning) {
-                lapCount++;
-                const lapTime = formatTime(elapsedTime);
-                
-                const lapItem = document.createElement('div');
-                lapItem.className = 'lap-item';
-                lapItem.innerHTML = `
-                    <span class="lap-number">Vuelta ${lapCount}</span>
-                    <span class="lap-time">${lapTime}</span>
-                `;
-                
-                lapsContainer.prepend(lapItem);
-            }
-        }
-
-        // Event listeners para los botones
-        startBtn.addEventListener('click', startTimer);
-        pauseBtn.addEventListener('click', pauseTimer);
-        resetBtn.addEventListener('click', resetTimer);
-        lapBtn.addEventListener('click', recordLap);
-    </script>
+    function showLoader(t) { 
+        document.getElementById('loaderText').innerText = t; 
+        document.getElementById('loader').style.display = 'flex'; 
+    }
+    
+    function hideLoader() { 
+        document.getElementById('loader').style.display = 'none'; 
+    }
+</script>
 </body>
 </html>

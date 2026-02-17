@@ -3,35 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flash Box Pro - V4</title>
+    <title>Flash Box Pro - V5.6 (debug)</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --success: #22c55e; }
-        body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; color: #1e293b; }
-        .nav-card { cursor: pointer; border: none; border-radius: 16px; transition: 0.3s; position: relative; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .nav-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        /* (mismos estilos que antes, los omito por brevedad, pero debes mantenerlos) */
+        :root { --primary: #6366f1; --success: #22c55e; --warning: #f59e0b; --danger: #ef4444; }
+        body { background: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; color: #1e293b; padding-bottom: 70px; }
+        .nav-card { cursor: pointer; border: none; border-radius: 16px; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); position: relative; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
+        .nav-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         .view-section { display: none; padding-top: 10px; animation: fadeIn 0.3s ease; }
         .active-view { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .badge-count { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.3); backdrop-filter: blur(4px); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; }
-        .img-thumb { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; background: #e2e8f0; }
-        .upload-zone { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        .btn-upload { border-radius: 12px; padding: 12px; font-weight: 600; transition: 0.2s; }
-        .loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        
-        /* Modal mejorado */
-        .modal-custom { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content-custom { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
-        
-        /* Modal de imagen */
-        .modal-image { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .img-thumb { width: 100%; height: 120px; object-fit: cover; cursor: pointer; background: linear-gradient(45deg, #e2e8f0, #f1f5f9); transition: transform 0.3s ease; }
+        .img-thumb:hover { transform: scale(1.02); }
+        .upload-zone { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 8px 30px rgba(0,0,0,0.05); border: 2px dashed #e2e8f0; }
+        .btn-upload { border-radius: 12px; padding: 12px; font-weight: 600; transition: all 0.2s; }
+        .loader { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        .toast { background: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; min-width: 300px; animation: slideInRight 0.3s ease; border-left: 5px solid; }
+        .toast-success { border-left-color: var(--success); }
+        .toast-error { border-left-color: var(--danger); }
+        .toast-info { border-left-color: var(--primary); }
+        .toast-warning { border-left-color: var(--warning); }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .modal-custom { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(3px); }
+        .modal-content-custom { background: white; border-radius: 16px; padding: 25px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); animation: modalFadeIn 0.3s ease; }
+        @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .modal-image { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
         .modal-image-content { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-        .modal-image-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .modal-image-close:hover { background: rgba(255,255,255,0.2); }
-        
-        /* Iconos de archivos */
+        .modal-image-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.15); border: none; color: white; font-size: 24px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .modal-image-close:hover { background: rgba(255,255,255,0.25); }
         .file-icon { font-size: 2.5rem; text-align: center; margin-bottom: 10px; }
         .file-pdf { color: #e53935; }
         .file-audio { color: #8e24aa; }
@@ -40,75 +45,65 @@
         .file-powerpoint { color: #d24726; }
         .file-cad { color: #ff6d00; }
         .file-other { color: #757575; }
+        .stats-bar { background: white; border-radius: 16px; padding: 12px 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .data-usage { display: flex; align-items: center; gap: 10px; }
+        .usage-bar { width: 150px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+        .usage-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); border-radius: 4px; transition: width 0.5s ease; }
+        .note-card { height: 100%; border-radius: 16px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s ease; overflow: hidden; }
+        .note-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .search-box { border-radius: 12px; border: 2px solid #e2e8f0; padding: 10px 15px; transition: all 0.3s; }
+        .search-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+        .comparison-modal { max-width: 800px !important; }
+        .comparison-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin: 20px 0; }
+        .comparison-item { flex: 1; min-width: 250px; text-align: center; }
+        .comparison-item img { max-width: 100%; max-height: 200px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .badge-original { background: var(--primary); color: white; }
+        .badge-compressed { background: var(--success); color: white; }
+        .quality-slider { width: 100%; margin: 15px 0; }
+        .file-size-info { font-size: 0.9rem; color: #64748b; margin-top: 5px; }
+        .text-truncate-multiline { display: -webkit-box; -webkit-line-clamp: var(--lines, 2); -webkit-box-orient: vertical; overflow: hidden; }
+        .badge-original, .badge-compressed { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; }
+        .thumbnail-container { width: 100%; height: 120px; overflow: hidden; }
+        @media (max-width: 768px) { .stats-bar { flex-direction: column; align-items: flex-start; gap: 15px; } .usage-bar { width: 100%; } .comparison-container { flex-direction: column; } }
     </style>
 </head>
 <body>
 
-<div id="loader" class="loader">
-    <div class="spinner-grow text-primary"></div>
-    <span id="loaderText" class="mt-3 fw-bold">Optimizando...</span>
-</div>
+<div class="toast-container" id="toastContainer"></div>
+<div id="loader" class="loader"><div class="spinner-grow text-primary" style="width:3rem;height:3rem;"></div><span id="loaderText" class="mt-3 fw-bold fs-5">Procesando...</span></div>
 
-<!-- Modal para editar notas -->
-<div id="noteModal" class="modal-custom">
-    <div class="modal-content-custom">
-        <h5 class="fw-bold mb-3">📝 Editar Nota</h5>
-        <input type="text" id="editNoteTitle" class="form-control mb-3 border-2" placeholder="Título de la nota...">
-        <textarea id="editNoteContent" class="form-control mb-3 border-2" placeholder="Contenido..." rows="8"></textarea>
-        <div class="d-flex gap-2 justify-content-end">
-            <button onclick="closeModal()" class="btn btn-light">Cancelar</button>
-            <button onclick="saveEditedNote()" class="btn btn-primary">Guardar Cambios</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para visualizar imágenes -->
-<div id="imageModal" class="modal-image">
-    <button class="modal-image-close" onclick="closeImageModal()">×</button>
-    <img id="modalImage" class="modal-image-content">
-</div>
+<!-- Modales (igual que antes) -->
+<div id="noteModal" class="modal-custom"><div class="modal-content-custom"><h5 class="fw-bold mb-3"><i class="fas fa-edit me-2"></i>Editar Nota</h5><input type="text" id="editNoteTitle" class="form-control mb-3 border-2" placeholder="Título..."><textarea id="editNoteContent" class="form-control mb-3 border-2" placeholder="Contenido..." rows="8"></textarea><div class="d-flex gap-2 justify-content-end"><button onclick="closeModal()" class="btn btn-light">Cancelar</button><button onclick="saveEditedNote()" class="btn btn-primary">Guardar Cambios</button></div></div></div>
+<div id="imageModal" class="modal-image"><button class="modal-image-close" onclick="closeImageModal()">×</button><img id="modalImage" class="modal-image-content"></div>
+<div id="comparisonModal" class="modal-custom"><div class="modal-content-custom comparison-modal"><h5 class="fw-bold mb-3"><i class="fas fa-compress-alt me-2"></i>Opciones de Compresión</h5><div class="comparison-container" id="comparisonContainer"></div><div class="mb-3"><label class="form-label fw-bold">Calidad: <span id="qualityValue">80</span>%</label><input type="range" class="quality-slider" id="qualitySlider" min="10" max="100" value="80"></div><div class="d-flex gap-2 justify-content-end flex-wrap"><button onclick="closeComparisonModal()" class="btn btn-light">Cancelar</button><button onclick="keepOriginalImage()" class="btn btn-outline-primary"><i class="fas fa-star me-2"></i>Mantener Original</button><button onclick="uploadCompressedImage()" class="btn btn-success"><i class="fas fa-compress-alt me-2"></i>Subir Comprimida</button></div></div></div>
 
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold m-0" onclick="showView('home')" style="cursor:pointer">⚡ Flash Box</h2>
-        <button id="btnBack" class="btn btn-light border-0 rounded-pill d-none" onclick="showView('home')">← Inicio</button>
+    <div class="stats-bar">
+        <div><h5 class="fw-bold m-0" onclick="showView('home')" style="cursor:pointer"><i class="fas fa-bolt me-2"></i>Flash Box Pro</h5><small class="text-muted">Gestor personal de archivos</small></div>
+        <div class="data-usage"><div><small class="fw-bold">Consumo diario:</small><div id="dataUsage" class="fw-bold">0 MB / 300 MB</div></div><div class="usage-bar"><div id="usageFill" class="usage-fill" style="width:0%"></div></div></div>
     </div>
 
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <button id="btnBack" class="btn btn-light border-0 rounded-pill px-4 d-none" onclick="showView('home')"><i class="fas fa-arrow-left me-2"></i>Volver al Inicio</button>
+        <div id="searchContainer" class="d-none" style="width:300px;"><input type="text" id="searchInput" class="form-control search-box" placeholder="Buscar..."></div>
+    </div>
+
+    <!-- Vista home -->
     <div id="view-home" class="view-section active-view">
         <div class="row g-3 mb-4">
-            <div class="col-6 col-md-3" onclick="loadAndShow('notas')"><div class="card nav-card bg-primary text-white p-4"><div id="count-notas" class="badge-count">0</div><div class="fs-2">📝</div><b>NOTAS</b></div></div>
-            <div class="col-6 col-md-3" onclick="loadAndShow('imagenes')"><div class="card nav-card bg-success text-white p-4"><div id="count-imagenes" class="badge-count">0</div><div class="fs-2">🖼️</div><b>FOTOS</b></div></div>
-            <div class="col-6 col-md-3" onclick="loadAndShow('pdf')"><div class="card nav-card bg-danger text-white p-4"><div id="count-pdf" class="badge-count">0</div><div class="fs-2">📕</div><b>PDFs</b></div></div>
-            <div class="col-6 col-md-3" onclick="loadAndShow('otros')"><div class="card nav-card bg-warning text-dark p-4"><div id="count-otros" class="badge-count">0</div><div class="fs-2">📦</div><b>OTROS</b></div></div>
+            <div class="col-6 col-md-3" onclick="loadAndShow('notas')"><div class="card nav-card bg-primary text-white p-4"><div id="count-notas" class="badge-count">0</div><div class="fs-2"><i class="fas fa-sticky-note"></i></div><b>NOTAS</b></div></div>
+            <div class="col-6 col-md-3" onclick="loadAndShow('imagenes')"><div class="card nav-card bg-success text-white p-4"><div id="count-imagenes" class="badge-count">0</div><div class="fs-2"><i class="fas fa-image"></i></div><b>FOTOS</b></div></div>
+            <div class="col-6 col-md-3" onclick="loadAndShow('pdf')"><div class="card nav-card bg-danger text-white p-4"><div id="count-pdf" class="badge-count">0</div><div class="fs-2"><i class="fas fa-file-pdf"></i></div><b>PDFs</b></div></div>
+            <div class="col-6 col-md-3" onclick="loadAndShow('otros')"><div class="card nav-card bg-warning text-dark p-4"><div id="count-otros" class="badge-count">0</div><div class="fs-2"><i class="fas fa-archive"></i></div><b>OTROS</b></div></div>
         </div>
-
-        <div class="upload-zone">
-            <h5 class="fw-bold mb-3">Subida Rápida</h5>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <div class="p-3 border rounded-4 bg-light">
-                        <small class="fw-bold text-primary">NUEVA NOTA</small>
-                        <input type="text" id="noteTitle" class="form-control my-2 border-0 shadow-sm" placeholder="Título de la nota...">
-                        <textarea id="noteContent" class="form-control mb-2 border-0 shadow-sm" placeholder="Contenido..." rows="2"></textarea>
-                        <button onclick="saveNote()" class="btn btn-primary btn-upload w-100">Guardar Nota</button>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="p-3 border rounded-4 bg-light">
-                        <small class="fw-bold text-success">NUEVO ARCHIVO</small>
-                        <input type="text" id="customFileName" class="form-control my-2 border-0 shadow-sm" placeholder="Nombre opcional...">
-                        <input type="file" id="fileInput" class="form-control mb-2 border-0 shadow-sm">
-                        <button onclick="uploadFile()" class="btn btn-success btn-upload w-100 text-white">Subir Archivo</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="upload-zone"><h5 class="fw-bold mb-3"><i class="fas fa-cloud-upload-alt me-2"></i>Subida Rápida</h5><div class="row g-3"><div class="col-md-6"><div class="p-3 border rounded-4 bg-light"><small class="fw-bold text-primary"><i class="fas fa-plus-circle me-1"></i>NUEVA NOTA</small><input type="text" id="noteTitle" class="form-control my-2 border-0 shadow-sm" placeholder="Título..."><textarea id="noteContent" class="form-control mb-2 border-0 shadow-sm" placeholder="Contenido..." rows="2"></textarea><button onclick="saveNote()" class="btn btn-primary btn-upload w-100"><i class="fas fa-save me-2"></i>Guardar Nota</button></div></div><div class="col-md-6"><div class="p-3 border rounded-4 bg-light"><small class="fw-bold text-success"><i class="fas fa-file-upload me-1"></i>NUEVO ARCHIVO</small><input type="text" id="customFileName" class="form-control my-2 border-0 shadow-sm" placeholder="Nombre opcional..."><input type="file" id="fileInput" class="form-control mb-2 border-0 shadow-sm" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.dwg,.dxf"><div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="compressImages"><label class="form-check-label" for="compressImages"><i class="fas fa-compress-alt me-1"></i>Comprimir imágenes</label><small class="text-muted d-block">Se mostrará vista previa</small></div><button onclick="prepareUpload()" class="btn btn-success btn-upload w-100 text-white"><i class="fas fa-upload me-2"></i>Preparar Subida</button></div></div></div></div>
     </div>
 
-    <div id="view-notas" class="view-section"><h4>Mis Notas</h4><div id="list-notas" class="row g-3"></div></div>
-    <div id="view-imagenes" class="view-section"><h4>Galería de Imágenes</h4><div id="list-imagenes" class="row g-2"></div></div>
-    <div id="view-pdf" class="view-section"><h4>Documentos PDF</h4><div id="list-pdf" class="row g-2"></div></div>
-    <div id="view-otros" class="view-section"><h4>Otros Archivos</h4><div id="list-otros" class="row g-2"></div></div>
+    <!-- Vistas de categorías -->
+    <div id="view-notas" class="view-section"><h4><i class="fas fa-sticky-note me-2"></i>Mis Notas</h4><div id="list-notas" class="row g-3"></div></div>
+    <div id="view-imagenes" class="view-section"><h4><i class="fas fa-images me-2"></i>Galería de Imágenes</h4><div id="list-imagenes" class="row g-2"></div></div>
+    <div id="view-pdf" class="view-section"><h4><i class="fas fa-file-pdf me-2"></i>Documentos PDF</h4><div id="list-pdf" class="row g-2"></div></div>
+    <div id="view-otros" class="view-section"><h4><i class="fas fa-archive me-2"></i>Otros Archivos</h4><div id="list-otros" class="row g-2"></div></div>
 </div>
 
 <script>
@@ -124,33 +119,107 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Variables globales
     let currentNoteId = null;
+    let dailyDataUsage = 0;
+    let thumbnailsCache = {};
+    let pendingUpload = { file: null, originalData: null, compressedData: null, originalSize: 0, compressedSize: 0, fileName: '', customName: '' };
 
-    // Función para obtener icono según extensión
-    function getFileIcon(name) {
-        const ext = name.split('.').pop().toLowerCase();
-        
-        if (ext === 'pdf') return { icon: '📕', class: 'file-pdf' };
-        if (['mp3', 'wav', 'm4a', 'ogg', 'flac', 'aac'].includes(ext)) return { icon: '🎵', class: 'file-audio' };
-        if (['doc', 'docx', 'rtf'].includes(ext)) return { icon: '📘', class: 'file-word' };
-        if (['xls', 'xlsx', 'csv'].includes(ext)) return { icon: '📗', class: 'file-excel' };
-        if (['ppt', 'pptx'].includes(ext)) return { icon: '📙', class: 'file-powerpoint' };
-        if (['dwg', 'dxf', 'dwt', 'bak', 'dws', 'dwl', 'dwf', 'dwfx'].includes(ext)) return { icon: '📐', class: 'file-cad' };
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'tiff'].includes(ext)) return { icon: '🖼️', class: '' };
-        
-        return { icon: '📦', class: 'file-other' };
+    function showToast(message, type = 'success', duration = 3000) {
+        const toast = document.getElementById('toastContainer');
+        const toastEl = document.createElement('div');
+        toastEl.className = `toast toast-${type}`;
+        const icons = { success: 'check-circle', error: 'exclamation-circle', info: 'info-circle', warning: 'exclamation-triangle' };
+        toastEl.innerHTML = `<i class="fas fa-${icons[type]} fa-lg"></i><div style="flex:1;">${message}</div>`;
+        toast.appendChild(toastEl);
+        setTimeout(() => { if (toastEl.parentNode) { toastEl.style.animation = 'slideOutRight 0.3s ease forwards'; setTimeout(() => { if (toastEl.parentNode) toastEl.remove(); }, 300); } }, duration);
     }
 
-    // --- CONTADORES INICIALES ---
+    function updateDataUsage() {
+        db.ref('estadisticas/consumo_hoy').once('value').then(snap => {
+            const data = snap.val() || { fecha: '', consumo: 0 };
+            const hoy = new Date().toDateString();
+            if (data.fecha !== hoy) { data.fecha = hoy; data.consumo = 0; }
+            dailyDataUsage = data.consumo;
+            const usagePercent = (dailyDataUsage / 300) * 100;
+            document.getElementById('dataUsage').textContent = `${dailyDataUsage.toFixed(2)} MB / 300 MB`;
+            document.getElementById('usageFill').style.width = `${Math.min(usagePercent, 100)}%`;
+            const fill = document.getElementById('usageFill');
+            if (usagePercent > 90) fill.style.background = '#ef4444';
+            else if (usagePercent > 70) fill.style.background = '#f59e0b';
+            else fill.style.background = '#22c55e';
+            if (usagePercent > 90) showToast(`⚠️ Has usado ${dailyDataUsage.toFixed(2)}/300 MB hoy`, "warning", 5000);
+        });
+    }
+
+    function trackDataUsage(bytes, operation = 'unknown') {
+        const hoy = new Date().toDateString();
+        db.ref('estadisticas/consumo_hoy').once('value').then(snap => {
+            const data = snap.val() || { fecha: '', consumo: 0 };
+            if (data.fecha !== hoy) { data.fecha = hoy; data.consumo = 0; }
+            data.consumo += bytes / (1024 * 1024);
+            db.ref('estadisticas/consumo_hoy').set(data).then(() => {
+                dailyDataUsage = data.consumo;
+                updateDataUsage();
+                console.log(`📊 Transferencia: ${(bytes/1024).toFixed(2)} KB (${operation})`);
+            });
+        });
+    }
+
+    function getFileIcon(name) {
+        const ext = name.split('.').pop().toLowerCase();
+        if (ext === 'pdf') return { icon: 'file-pdf', class: 'file-pdf' };
+        if (['mp3','wav','m4a','ogg','flac','aac'].includes(ext)) return { icon: 'file-audio', class: 'file-audio' };
+        if (['doc','docx','rtf'].includes(ext)) return { icon: 'file-word', class: 'file-word' };
+        if (['xls','xlsx','csv'].includes(ext)) return { icon: 'file-excel', class: 'file-excel' };
+        if (['ppt','pptx'].includes(ext)) return { icon: 'file-powerpoint', class: 'file-powerpoint' };
+        if (['dwg','dxf','dwt','bak','dws','dwl','dwf','dwfx'].includes(ext)) return { icon: 'file-cad', class: 'file-cad' };
+        if (['jpg','jpeg','png','gif','webp','bmp','svg','tiff'].includes(ext)) return { icon: 'file-image', class: '' };
+        return { icon: 'file', class: 'file-other' };
+    }
+
+    async function createThumbnail(imageDataUrl, maxSize = 200) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width, height = img.height;
+                if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } }
+                else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } }
+                canvas.width = width; canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', 0.8));
+            };
+            img.src = imageDataUrl;
+        });
+    }
+
+    async function compressImage(file, quality = 80) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width; canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    const compressed = canvas.toDataURL('image/jpeg', quality / 100);
+                    resolve({ data: compressed, size: Math.floor((compressed.length - 'data:image/jpeg;base64,'.length) * 0.75), dimensions: { width: img.width, height: img.height } });
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
     function updateCounts() {
-        db.ref('notas').on('value', s => document.getElementById('count-notas').innerText = s.numChildren());
-        db.ref('metadata').on('value', s => {
+        db.ref('notas').once('value', s => { trackDataUsage(JSON.stringify(s.val()).length, 'contar-notas'); document.getElementById('count-notas').innerText = s.numChildren(); });
+        db.ref('metadata').once('value', s => {
+            trackDataUsage(JSON.stringify(s.val()).length, 'contar-archivos');
             let img = 0, pdf = 0, otr = 0;
             s.forEach(child => {
                 const name = child.val().name.toLowerCase();
-                if(name.endsWith('.pdf')) pdf++;
-                else if(/\.(jpg|jpeg|png|gif|webp|bmp|svg|tiff)$/i.test(name)) img++;
+                if (name.endsWith('.pdf')) pdf++;
+                else if (/\.(jpg|jpeg|png|gif|webp|bmp|svg|tiff)$/i.test(name)) img++;
                 else otr++;
             });
             document.getElementById('count-pdf').innerText = pdf;
@@ -158,315 +227,331 @@
             document.getElementById('count-otros').innerText = otr;
         });
     }
-    updateCounts();
 
-    // --- CARGA DINÁMICA ---
+    // ===== FUNCIÓN PRINCIPAL CORREGIDA CON LOGS =====
     function loadAndShow(type) {
-        showLoader("Sincronizando...");
+        showLoader("Cargando...");
         const listDiv = document.getElementById('list-' + type);
-        listDiv.innerHTML = "";
-        
+        if (!listDiv) { console.error('❌ No se encontró el contenedor para', type); return; }
+        listDiv.innerHTML = ""; // Limpiar
+
+        if (type !== 'imagenes') thumbnailsCache = {};
+
+        document.getElementById('searchContainer').classList.remove('d-none');
+        document.getElementById('searchInput').value = '';
+
         const path = (type === 'notas') ? 'notas' : 'metadata';
-        db.ref(path).once('value', snap => {
+
+        db.ref(path).once('value').then(snap => {
+            trackDataUsage(JSON.stringify(snap.val()).length, 'cargar-' + type);
             const data = snap.val();
-            if(!data) listDiv.innerHTML = `<div class="col-12 text-center text-muted p-5">Vacío</div>`;
-            else {
-                Object.entries(data).reverse().forEach(([id, item]) => {
-                    const ext = item.name ? item.name.split('.').pop().toLowerCase() : '';
-                    if(type === 'pdf' && ext !== 'pdf') return;
-                    if(type === 'imagenes' && !['jpg','jpeg','png','gif','webp','bmp','svg','tiff'].includes(ext)) return;
-                    if(type === 'otros' && (ext === 'pdf' || ['jpg','jpeg','png','gif','webp','bmp','svg','tiff'].includes(ext))) return;
-                    
-                    renderItem(type, id, item, listDiv);
+
+            // Mostrar la vista inmediatamente
+            showView(type);
+            console.log(`🔍 Vista cambiada a: ${type}`);
+
+            if (!data) {
+                listDiv.innerHTML = `<div class="col-12 text-center text-muted p-5"><i class="fas fa-inbox fa-3x mb-3 opacity-50"></i><h6 class="fw-bold">No hay elementos</h6><small>Añade algunos elementos para comenzar</small></div>`;
+                hideLoader();
+                return;
+            }
+
+            const items = [];
+            const entries = Object.entries(data).reverse();
+
+            if (type === 'notas') {
+                entries.forEach(([id, item]) => items.push({ id, item }));
+            } else {
+                entries.forEach(([id, item]) => {
+                    if (!item || !item.name) return;
+                    const ext = item.name.split('.').pop().toLowerCase();
+                    const esImagen = ['jpg','jpeg','png','gif','webp','bmp','svg','tiff'].includes(ext);
+                    const esPdf = (ext === 'pdf');
+                    if (type === 'pdf' && esPdf) items.push({ id, item });
+                    else if (type === 'imagenes' && esImagen) items.push({ id, item });
+                    else if (type === 'otros' && !esPdf && !esImagen) items.push({ id, item });
                 });
             }
-            showView(type);
+
+            console.log(`📁 ${type}: ${items.length} elementos encontrados`);
+
+            if (items.length === 0) {
+                listDiv.innerHTML = `<div class="col-12 text-center text-muted p-5"><i class="fas fa-inbox fa-3x mb-3 opacity-50"></i><h6 class="fw-bold">No hay elementos en esta categoría</h6></div>`;
+                hideLoader();
+                return;
+            }
+
+            // Renderizar todos los elementos de una vez (sin chunk para simplificar debug)
+            items.forEach(({ id, item }) => {
+                if (!document.getElementById(`item-${type}-${id}`)) {
+                    renderItem(type, id, item, listDiv);
+                }
+            });
+
+            console.log(`✅ Renderizados ${items.length} elementos en #list-${type}`);
             hideLoader();
+
+        }).catch(error => {
+            hideLoader();
+            showToast('Error al cargar datos: ' + error.message, 'error');
         });
     }
 
+    // ===== RENDERITEM (con logs internos) =====
     function renderItem(type, id, item, container) {
+        console.log(`🖌️ Renderizando ${type} id=${id}`, item);
         const col = document.createElement('div');
-        
-        if(type === 'notas') {
-            col.className = 'col-12 col-md-4';
-            col.innerHTML = `
-                <div class="card p-3 border-0 shadow-sm h-100 rounded-4">
-                    <h6 class="fw-bold text-primary mb-1">${item.title || 'Sin Título'}</h6>
-                    <p class="small text-truncate mb-2">${item.content.substring(0,60)}...</p>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-light flex-grow-1" onclick="openNoteEditor('${id}')">Editar</button>
-                        <button class="btn btn-sm btn-light text-danger" onclick="deleteItem('notas','${id}')">Eliminar</button>
-                    </div>
-                </div>`;
-        } else if(type === 'imagenes') {
-            col.className = 'col-6 col-md-3';
-            const isLarge = (item.bytes || 0) > 1 * 1024 * 1024;
-            col.innerHTML = `
-                <div class="card p-1 border-0 shadow-sm rounded-3 overflow-hidden">
-                    <div id="thumb-${id}">
-                        ${!isLarge ? `<img src="https://placehold.co/200x200?text=Cargando..." class="img-thumb" id="img-${id}">` : 
-                        `<div class="img-thumb d-flex flex-column align-items-center justify-content-center bg-light" onclick="loadLargeImage('${id}')">
-                            <span class="fs-1">👁️</span><small class="fw-bold">CARGAR (${item.size})</small>
-                        </div>`}
-                    </div>
-                    <div class="p-1 d-flex justify-content-between align-items-center">
-                        <small class="text-truncate fw-bold" style="max-width:80%">${item.name}</small>
-                        <div class="d-flex gap-1">
-                            <button class="btn btn-sm p-0 text-primary" onclick="downloadFile('${id}', '${item.name}')" title="Descargar">⬇️</button>
-                            <button class="btn btn-sm p-0 text-danger" onclick="deleteItem('file','${id}')" title="Eliminar">✕</button>
+        col.id = `item-${type}-${id}`;
+        col.dataset.id = id;
+
+        try {
+            if (type === 'notas') {
+                col.className = 'col-12 col-md-4';
+                col.innerHTML = `
+                    <div class="card note-card p-3 h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold text-primary mb-1 flex-grow-1">${item.title || 'Sin Título'}</h6>
+                            <small class="text-muted">${formatDate(item.time)}</small>
                         </div>
-                    </div>
-                </div>`;
-            if(!isLarge) fetchThumbnail(id);
-        } else if(type === 'pdf') {
-            col.className = 'col-6 col-md-4';
-            const fileIcon = getFileIcon(item.name);
-            col.innerHTML = `
-                <div class="card p-3 border-0 shadow-sm rounded-4">
-                    <div class="${fileIcon.class} file-icon">${fileIcon.icon}</div>
-                    <div class="text-center mb-3">
-                        <b class="d-block text-truncate">${item.name}</b>
-                        <small class="text-muted">${item.size} • ${formatDate(item.time)}</small>
-                    </div>
-                    <div class="d-flex gap-2 justify-content-center">
-                        <button onclick="downloadFile('${id}', '${item.name}')" class="btn btn-sm btn-primary" title="Descargar">⬇️ Descargar</button>
-                        <button onclick="deleteItem('file','${id}')" class="btn btn-sm btn-danger" title="Eliminar">✕ Eliminar</button>
-                    </div>
-                </div>`;
-        } else if(type === 'otros') {
-            col.className = 'col-6 col-md-4';
-            const fileIcon = getFileIcon(item.name);
-            col.innerHTML = `
-                <div class="card p-3 border-0 shadow-sm rounded-4">
-                    <div class="${fileIcon.class} file-icon">${fileIcon.icon}</div>
-                    <div class="text-center mb-3">
-                        <b class="d-block text-truncate">${item.name}</b>
-                        <small class="text-muted">${item.size} • ${formatDate(item.time)}</small>
-                    </div>
-                    <div class="d-flex gap-2 justify-content-center">
-                        <button onclick="downloadFile('${id}', '${item.name}')" class="btn btn-sm btn-primary" title="Descargar">⬇️ Descargar</button>
-                        <button onclick="deleteItem('file','${id}')" class="btn btn-sm btn-danger" title="Eliminar">✕ Eliminar</button>
-                    </div>
-                </div>`;
+                        <p class="small mb-3 text-truncate-multiline" style="--lines: 3">${(item.content || '').substring(0,150)}...</p>
+                        <div class="d-flex gap-2 mt-auto">
+                            <button class="btn btn-sm btn-outline-primary flex-grow-1" onclick="openNoteEditor('${id}')"><i class="fas fa-edit me-1"></i>Editar</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete('notas','${id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`;
+            } else if (type === 'imagenes') {
+                col.className = 'col-6 col-md-3 col-lg-2';
+                const thumbId = `thumb-${id}-${Date.now()}`;
+                col.innerHTML = `
+                    <div class="card p-1 border-0 shadow-sm rounded-3 overflow-hidden">
+                        <div id="${thumbId}" class="thumbnail-container" style="width:100%; height:120px;">
+                            <div class="img-thumb d-flex flex-column align-items-center justify-content-center bg-light" style="height:100%;">
+                                <i class="fas fa-image fa-2x text-muted mb-2"></i>
+                                <small class="text-center fw-bold">Cargando...</small>
+                            </div>
+                        </div>
+                        <div class="p-1 d-flex justify-content-between align-items-center">
+                            <small class="text-truncate fw-bold" style="max-width:80%" title="${item.name}">${item.name}</small>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm p-0 text-primary" onclick="downloadFile('${id}', '${item.name}')" title="Descargar"><i class="fas fa-download"></i></button>
+                                <button class="btn btn-sm p-0 text-danger" onclick="confirmDelete('file','${id}')" title="Eliminar"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>`;
+                setTimeout(() => { loadOptimizedImage(id, thumbId); }, 10);
+            } else {
+                const fileIcon = getFileIcon(item.name);
+                const colClass = type === 'pdf' ? 'col-6 col-md-4' : 'col-6 col-md-4 col-lg-3';
+                col.className = colClass;
+                col.innerHTML = `
+                    <div class="card p-3 border-0 shadow-sm rounded-4 h-100">
+                        <div class="${fileIcon.class} file-icon"><i class="fas fa-${fileIcon.icon} fa-2x"></i></div>
+                        <div class="text-center mb-3">
+                            <b class="d-block text-truncate" title="${item.name}">${item.name}</b>
+                            <small class="text-muted">${item.size} • ${formatDate(item.time)}</small>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-center mt-auto">
+                            <button onclick="downloadFile('${id}', '${item.name}')" class="btn btn-sm btn-primary" title="Descargar"><i class="fas fa-download me-1"></i>Descargar</button>
+                            <button onclick="confirmDelete('file','${id}')" class="btn btn-sm btn-danger" title="Eliminar"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`;
+            }
+            container.appendChild(col);
+            console.log(`   ✅ Elemento ${type} añadido al DOM`, col);
+        } catch (e) {
+            console.error(`❌ Error al renderizar ${type} id=${id}:`, e);
         }
-        container.appendChild(col);
     }
 
-    function formatDate(timestamp) {
-        if(!timestamp) return 'Sin fecha';
-        const date = new Date(timestamp);
-        return date.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    }
-
-    // --- MODAL DE IMAGEN ---
-    function openImageModal(imageUrl) {
-        document.getElementById('modalImage').src = imageUrl;
-        document.getElementById('imageModal').style.display = 'flex';
-    }
-
-    function closeImageModal() {
-        document.getElementById('imageModal').style.display = 'none';
-        document.getElementById('modalImage').src = '';
-    }
-
-    // Cerrar modal de imagen al hacer clic fuera
-    document.getElementById('imageModal').addEventListener('click', function(e) {
-        if(e.target === this) closeImageModal();
-    });
-
-    // Cerrar con Escape
-    document.addEventListener('keydown', function(e) {
-        if(e.key === 'Escape') {
-            closeModal();
-            closeImageModal();
+    // ===== RESTO DE FUNCIONES (sin cambios, solo las necesarias) =====
+    async function loadOptimizedImage(id, thumbId) {
+        try {
+            const thumbSnapshot = await db.ref('file_storage/' + id + '/thumb').once('value');
+            trackDataUsage(JSON.stringify(thumbSnapshot.val()).length, 'cargar-thumbnail');
+            let thumbnail = thumbSnapshot.val();
+            const thumbElement = document.getElementById(thumbId);
+            if (!thumbElement) return;
+            if (thumbnail) {
+                thumbnailsCache[id] = thumbnail;
+                thumbElement.innerHTML = `<img src="${thumbnail}" class="img-thumb" onclick="openImageModalFromThumb('${id}')" onerror="this.src='https://placehold.co/200x200?text=Error'">`;
+            } else {
+                thumbElement.innerHTML = `<div class="img-thumb d-flex flex-column align-items-center justify-content-center bg-light" onclick="openImageModalFromThumb('${id}')"><i class="fas fa-image fa-2x text-muted"></i><small class="text-center fw-bold">Sin vista</small></div>`;
+            }
+        } catch (error) {
+            console.error('Error loading image:', error);
+            const thumbElement = document.getElementById(thumbId);
+            if (thumbElement) thumbElement.innerHTML = `<div class="img-thumb d-flex flex-column align-items-center justify-content-center bg-light" onclick="openImageModalFromThumb('${id}')"><i class="fas fa-exclamation-triangle fa-2x text-danger"></i><small class="text-center fw-bold">Error</small></div>`;
         }
-    });
+    }
 
-    // --- EDITOR DE NOTAS ---
+    function openImageModalFromThumb(id) {
+        showLoader("Cargando imagen...");
+        db.ref('file_storage/' + id + '/data').once('value').then(s => {
+            trackDataUsage(JSON.stringify(s.val()).length, 'abrir-imagen');
+            if (s.val()) { openImageModal(s.val()); hideLoader(); }
+        }).catch(() => { hideLoader(); showToast("Error al cargar la imagen", "error"); });
+    }
+    function openImageModal(imageUrl) { document.getElementById('modalImage').src = imageUrl; document.getElementById('imageModal').style.display = 'flex'; }
+    function closeImageModal() { document.getElementById('imageModal').style.display = 'none'; document.getElementById('modalImage').src = ''; }
+    document.getElementById('imageModal').addEventListener('click', function(e) { if(e.target === this) closeImageModal(); });
+
     function openNoteEditor(id) {
         db.ref('notas/' + id).once('value').then(snap => {
+            trackDataUsage(JSON.stringify(snap.val()).length, 'editar-nota');
             const note = snap.val();
-            if(note) {
-                currentNoteId = id;
-                document.getElementById('editNoteTitle').value = note.title || '';
-                document.getElementById('editNoteContent').value = note.content || '';
-                document.getElementById('noteModal').style.display = 'flex';
-            }
+            if (note) { currentNoteId = id; document.getElementById('editNoteTitle').value = note.title || ''; document.getElementById('editNoteContent').value = note.content || ''; document.getElementById('noteModal').style.display = 'flex'; }
         });
     }
-
     function saveEditedNote() {
-        if(!currentNoteId) return;
-        
+        if (!currentNoteId) return;
         const newTitle = document.getElementById('editNoteTitle').value.trim() || 'Nota sin título';
         const newContent = document.getElementById('editNoteContent').value.trim();
-        
-        if(!newContent) {
-            alert("El contenido no puede estar vacío");
-            return;
-        }
-        
+        if (!newContent) { showToast("El contenido no puede estar vacío", "error"); return; }
         showLoader("Guardando cambios...");
-        db.ref('notas/' + currentNoteId).update({
-            title: newTitle,
-            content: newContent,
-            updated: Date.now()
-        }).then(() => {
-            hideLoader();
-            closeModal();
-            loadAndShow('notas');
-        });
+        const updateData = { title: newTitle, content: newContent, updated: Date.now() };
+        trackDataUsage(JSON.stringify(updateData).length, 'guardar-nota');
+        db.ref('notas/' + currentNoteId).update(updateData).then(() => { hideLoader(); closeModal(); showToast("Nota actualizada", "success"); loadAndShow('notas'); });
     }
+    function closeModal() { document.getElementById('noteModal').style.display = 'none'; currentNoteId = null; }
 
-    function closeModal() {
-        document.getElementById('noteModal').style.display = 'none';
-        currentNoteId = null;
-    }
-
-    // --- FUNCIONES DE ARCHIVOS ---
-    function fetchThumbnail(id) {
-        db.ref('file_storage/'+id+'/data').once('value').then(s => {
-            const imgEl = document.getElementById('img-'+id);
-            if(imgEl && s.val()) {
-                imgEl.src = s.val();
-                imgEl.onclick = () => openImageModal(s.val());
-            }
-        });
-    }
-
-    function loadLargeImage(id) {
-        showLoader("Cargando imagen grande...");
-        db.ref('file_storage/'+id+'/data').once('value').then(s => {
-            if(s.val()) {
-                document.getElementById('thumb-'+id).innerHTML = 
-                    `<img src="${s.val()}" class="img-thumb" onclick="openImageModal('${s.val()}')">`;
-                hideLoader();
-            }
-        });
-    }
-
-    function uploadFile() {
+    async function prepareUpload() {
         const file = document.getElementById('fileInput').files[0];
-        if(!file) return alert("Selecciona un archivo");
-        
-        let customName = document.getElementById('customFileName').value.trim();
-        const ext = file.name.split('.').pop();
-        const finalName = customName ? `${customName}.${ext}` : file.name;
-
-        showLoader("Subiendo " + finalName);
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const key = db.ref('metadata').push().key;
-            const meta = { 
-                name: finalName, 
-                size: formatFileSize(file.size), 
-                bytes: file.size,
-                type: file.type,
-                time: Date.now()
-            };
-            const up = {};
-            up['/metadata/'+key] = meta;
-            up['/file_storage/'+key] = { data: e.target.result };
-            db.ref().update(up).then(() => {
+        if (!file) { showToast("Selecciona un archivo primero", "error"); return; }
+        const customName = document.getElementById('customFileName').value.trim();
+        const compress = document.getElementById('compressImages').checked;
+        pendingUpload.file = file; pendingUpload.customName = customName;
+        if (!file.type.startsWith('image/') || !compress) { performUpload(file, customName); return; }
+        showLoader("Preparando vista previa...");
+        try {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                pendingUpload.originalData = e.target.result;
+                pendingUpload.originalSize = file.size;
+                const thumbnail = await createThumbnail(e.target.result, 400);
+                const compressed = await compressImage(file, 80);
+                pendingUpload.compressedData = compressed.data;
+                pendingUpload.compressedSize = compressed.size;
+                showComparisonModal(thumbnail, compressed);
                 hideLoader();
-                document.getElementById('fileInput').value = "";
-                document.getElementById('customFileName').value = "";
-                alert("Archivo subido ✓");
-                updateCounts();
-            });
+            };
+            reader.readAsDataURL(file);
+        } catch (error) { hideLoader(); showToast("Error al procesar imagen: " + error.message, "error"); }
+    }
+    function showComparisonModal(thumbnail, compressed) {
+        const container = document.getElementById('comparisonContainer');
+        container.innerHTML = `<div class="comparison-item"><span class="badge badge-original mb-2">Original</span><img src="${pendingUpload.originalData}" alt="Original"><div class="file-size-info"><i class="fas fa-file-image me-1"></i>${formatFileSize(pendingUpload.originalSize)}</div></div><div class="comparison-item"><span class="badge badge-compressed mb-2">Comprimida (80%)</span><img src="${compressed.data}" alt="Comprimida"><div class="file-size-info"><i class="fas fa-compress-alt me-1"></i>${formatFileSize(compressed.size)}<span class="text-success ms-2">-${Math.round((1 - compressed.size/pendingUpload.originalSize) * 100)}%</span></div></div>`;
+        const slider = document.getElementById('qualitySlider');
+        slider.value = 80; document.getElementById('qualityValue').textContent = 80;
+        slider.oninput = async function() {
+            const quality = this.value; document.getElementById('qualityValue').textContent = quality;
+            showLoader("Actualizando...");
+            const newCompressed = await compressImage(pendingUpload.file, quality);
+            pendingUpload.compressedData = newCompressed.data; pendingUpload.compressedSize = newCompressed.size;
+            document.querySelector('.comparison-item:last-child img').src = newCompressed.data;
+            document.querySelector('.comparison-item:last-child .file-size-info').innerHTML = `<i class="fas fa-compress-alt me-1"></i>${formatFileSize(newCompressed.size)}<span class="text-success ms-2">-${Math.round((1 - newCompressed.size/pendingUpload.originalSize) * 100)}%</span>`;
+            hideLoader();
         };
-        reader.readAsDataURL(file);
+        document.getElementById('comparisonModal').style.display = 'flex';
+    }
+    function closeComparisonModal() { document.getElementById('comparisonModal').style.display = 'none'; pendingUpload = { file: null, originalData: null, compressedData: null, originalSize: 0, compressedSize: 0, fileName: '', customName: '' }; }
+    function keepOriginalImage() { closeComparisonModal(); performUpload(pendingUpload.file, pendingUpload.customName, pendingUpload.originalData); }
+    function uploadCompressedImage() { closeComparisonModal(); performUpload(pendingUpload.file, pendingUpload.customName, pendingUpload.compressedData); }
+
+    async function performUpload(file, customName, customData = null) {
+        const ext = customData ? 'jpg' : file.name.split('.').pop();
+        const finalName = customName ? `${customName}.${ext}` : file.name;
+        showLoader(`Subiendo: ${finalName}`);
+        try {
+            let fileData, fileSize;
+            if (customData) { fileData = customData; fileSize = Math.floor((customData.length - 'data:image/jpeg;base64,'.length) * 0.75); }
+            else { const reader = new FileReader(); fileData = await new Promise((resolve) => { reader.onload = (e) => resolve(e.target.result); reader.readAsDataURL(file); }); fileSize = file.size; }
+            trackDataUsage(fileSize, 'subir-archivo');
+            const key = db.ref('metadata').push().key;
+            const meta = { name: finalName, size: formatFileSize(fileSize), bytes: fileSize, type: file.type, time: Date.now() };
+            const updates = {};
+            updates['/metadata/' + key] = meta;
+            updates['/file_storage/' + key + '/data'] = fileData;
+            trackDataUsage(JSON.stringify(meta).length, 'subir-metadata');
+            trackDataUsage(fileData.length * 0.75, 'subir-datos');
+            if (file.type.startsWith('image/') || customData) {
+                const thumbnail = await createThumbnail(fileData);
+                updates['/file_storage/' + key + '/thumb'] = thumbnail;
+                trackDataUsage(thumbnail.length * 0.75, 'subir-thumbnail');
+            }
+            await db.ref().update(updates);
+            hideLoader();
+            document.getElementById('fileInput').value = "";
+            document.getElementById('customFileName').value = "";
+            document.getElementById('compressImages').checked = false;
+            showToast(`✅ ${finalName} subido`, "success");
+            updateCounts();
+        } catch (error) { hideLoader(); showToast("Error al subir archivo: " + error.message, "error"); }
     }
 
-    function formatFileSize(bytes) {
-        if(bytes < 1024) return bytes + ' B';
-        if(bytes < 1024 * 1024) return (bytes/1024).toFixed(1) + ' KB';
-        return (bytes/(1024*1024)).toFixed(1) + ' MB';
-    }
+    function formatFileSize(bytes) { if (bytes < 1024) return bytes + ' B'; if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB'; return (bytes/(1024*1024)).toFixed(1) + ' MB'; }
+    function formatDate(timestamp) { if (!timestamp) return 'Sin fecha'; const d = new Date(timestamp); return d.toLocaleDateString(); }
 
     function downloadFile(id, name) {
         showLoader("Preparando descarga...");
-        db.ref('file_storage/'+id+'/data').once('value').then(s => {
-            if(!s.val()) {
-                hideLoader();
-                alert("Error: Archivo no encontrado");
-                return;
-            }
-            
-            const a = document.createElement("a");
-            a.href = s.val();
-            a.download = name;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            hideLoader();
-        });
+        db.ref('file_storage/' + id + '/data').once('value').then(s => {
+            if (!s.val()) { hideLoader(); showToast("Archivo no encontrado", "error"); return; }
+            trackDataUsage(JSON.stringify(s.val()).length, 'descargar-'+name);
+            const a = document.createElement("a"); a.href = s.val(); a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            hideLoader(); showToast(`✅ ${name} descargado`, "success");
+        }).catch(error => { hideLoader(); showToast("Error: " + error.message, "error"); });
     }
 
-    function deleteItem(mode, id) {
-        if(!confirm("¿Estás seguro de que quieres eliminar esto? Esta acción no se puede deshacer.")) return;
-        
+    function confirmDelete(mode, id) {
+        const itemType = mode === 'notas' ? 'nota' : 'archivo';
+        if (!confirm(`¿Eliminar esta ${itemType}?`)) return;
         showLoader("Eliminando...");
-        if(mode === 'notas') {
-            db.ref('notas/' + id).remove().then(() => {
-                hideLoader();
-                loadAndShow('notas');
-                updateCounts();
-            });
+        if (mode === 'notas') {
+            db.ref('notas/' + id).remove().then(() => { trackDataUsage(1,'eliminar-nota'); hideLoader(); showToast("✅ Nota eliminada","success"); loadAndShow('notas'); updateCounts(); }).catch(error => { hideLoader(); showToast("❌ Error: " + error.message,"error"); });
         } else {
-            Promise.all([
-                db.ref('metadata/' + id).remove(),
-                db.ref('file_storage/' + id).remove()
-            ]).then(() => {
+            const updates = {};
+            updates['/metadata/' + id] = null;
+            updates['/file_storage/' + id + '/data'] = null;
+            updates['/file_storage/' + id + '/thumb'] = null;
+            trackDataUsage(1,'eliminar-archivo');
+            db.ref().update(updates).then(() => {
                 hideLoader();
-                // Recargar la vista actual
-                const activeView = document.querySelector('.view-section.active-view').id.replace('view-', '');
-                if(activeView !== 'home') loadAndShow(activeView);
+                if (thumbnailsCache[id]) delete thumbnailsCache[id];
+                showToast("✅ Archivo eliminado","success");
+                const activeView = document.querySelector('.view-section.active-view').id.replace('view-','');
+                if (activeView !== 'home') loadAndShow(activeView);
                 updateCounts();
-            });
+            }).catch(error => { hideLoader(); showToast("❌ Error: " + error.message,"error"); });
         }
     }
 
     function saveNote() {
         const t = document.getElementById('noteTitle').value.trim() || 'Nota sin título';
         const c = document.getElementById('noteContent').value.trim();
-        if(!c) return alert("Escribe el contenido");
-        
+        if (!c) { showToast("Escribe el contenido","error"); return; }
         showLoader("Guardando nota...");
-        db.ref('notas').push({
-            title: t, 
-            content: c, 
-            time: Date.now(),
-            updated: Date.now()
-        }).then(() => {
-            document.getElementById('noteTitle').value = "";
-            document.getElementById('noteContent').value = "";
-            hideLoader();
-            alert("Nota guardada ✓");
-            updateCounts();
-        });
+        const noteData = { title: t, content: c, time: Date.now(), updated: Date.now() };
+        trackDataUsage(JSON.stringify(noteData).length, 'guardar-nota');
+        db.ref('notas').push(noteData).then(() => { document.getElementById('noteTitle').value=""; document.getElementById('noteContent').value=""; hideLoader(); showToast("Nota guardada","success"); updateCounts(); });
     }
 
-    // --- VISTAS ---
-    function showView(v) {
-        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active-view'));
-        document.getElementById('view-' + v).classList.add('active-view');
-        document.getElementById('btnBack').classList.toggle('d-none', v === 'home');
-    }
+    function showView(v) { document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active-view')); document.getElementById('view-'+v).classList.add('active-view'); document.getElementById('btnBack').classList.toggle('d-none', v==='home'); document.getElementById('searchContainer').classList.toggle('d-none', v==='home'); }
+    function showLoader(t) { document.getElementById('loaderText').innerText = t; document.getElementById('loader').style.display = 'flex'; }
+    function hideLoader() { document.getElementById('loader').style.display = 'none'; }
 
-    function showLoader(t) { 
-        document.getElementById('loaderText').innerText = t; 
-        document.getElementById('loader').style.display = 'flex'; 
-    }
-    
-    function hideLoader() { 
-        document.getElementById('loader').style.display = 'none'; 
-    }
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const term = e.target.value.toLowerCase();
+        const activeView = document.querySelector('.view-section.active-view').id.replace('view-','');
+        document.querySelectorAll(`#list-${activeView} > div`).forEach(item => { item.style.display = item.textContent.toLowerCase().includes(term) ? '' : 'none'; });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCounts(); updateDataUsage();
+        const uploadZone = document.querySelector('.upload-zone');
+        uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.style.borderColor = '#22c55e'; uploadZone.style.background = '#f0fdf4'; });
+        uploadZone.addEventListener('dragleave', () => { uploadZone.style.borderColor = '#e2e8f0'; uploadZone.style.background = 'white'; });
+        uploadZone.addEventListener('drop', (e) => { e.preventDefault(); uploadZone.style.borderColor = '#e2e8f0'; uploadZone.style.background = 'white'; if (e.dataTransfer.files.length) { document.getElementById('fileInput').files = e.dataTransfer.files; prepareUpload(); } });
+        document.addEventListener('keydown', function(e) { if(e.key === 'Escape') { closeModal(); closeImageModal(); closeComparisonModal(); } });
+    });
 </script>
 </body>
 </html>
